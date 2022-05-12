@@ -1,7 +1,8 @@
 export default interface Node {
-    title: String,
-    url: String,
-    crawlTime: String,
-    links: [],
-    owner: null
+    id: null;
+    title: string;
+    url: string;
+    crawlTime: string;
+    links: [];
+    owner: {};
   }
