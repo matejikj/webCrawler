@@ -16,7 +16,7 @@ module.exports = mongoose => {
       return object;
     });
   
-    const WebPage = mongoose.model("node", schema);
-    return WebPage;
+    const Node = mongoose.model("node", schema);
+    return Node;
   };
   

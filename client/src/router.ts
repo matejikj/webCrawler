@@ -1,9 +1,7 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
-import Home from './views/Query.vue'
-import Query from './views/Query.vue'
-import Nodee from './views/Node.vue'
-import Webpage from './views/Webpage.vue'
+import Home from './views/Home.vue'
+import CreateNode from './views/CreateNode.vue'
 
 Vue.use(VueRouter)
 
@@ -14,19 +12,9 @@ const routes: Array<RouteConfig> = [
     component: Home
   },
   {
-    path: '/',
-    name: 'Queries',
-    component: Query
-  },
-  {
-    path: '/',
-    name: 'Nodes',
-    component: Nodee
-  },
-  {
-    path: '/',
-    name: 'Webpages',
-    component: Webpage
+    path: '/nodes/add',
+    name: 'CreateNode',
+    component: CreateNode
   }
 ]
 

@@ -9,25 +9,29 @@ exports.create = (req, res) => {
     return;
   }
 
+  console.log(req.body)
+
   // Create a Node
-  const Node = new Node({
+  const node = new Node({
     title: req.body.title,
-    description: req.body.description,
-    published: req.body.published ? req.body.published : false
+    url: req.body.url,
+    crawlTime: req.body.crawlTime,
+    links: req.body.links,
+    owner: req.body.owner
   });
 
-  // Save Node in the database
-  Node
-    .save(Node)
-    .then(data => {
-      res.send(data);
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while creating the Node."
-      });
-    });
+  // // Save Node in the database
+  // node
+  //   .save()
+  //   .then(data => {
+  //     res.send(data);
+  //   })
+  //   .catch(err => {
+  //     res.status(500).send({
+  //       message:
+  //         err.message || "Some error occurred while creating the Node."
+  //     });
+  //   });
 };
 
 // Retrieve all Nodes from the database.
