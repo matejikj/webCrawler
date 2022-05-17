@@ -11,6 +11,7 @@
     "@types/express": "^4.17.13",
     "axios": "^0.21.1",
     "core-js": "^3.6.5",
+    "d3": "^7.4.4",
     "moment": "^2.29.1",
     "moment-business-days": "^1.2.0",
     "sortablejs": "^1.13.0",

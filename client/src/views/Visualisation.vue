@@ -1,57 +1,35 @@
 
 <template>
   <v-container>
-    <h1>Create new node</h1>
-    <v-row>
-        <v-col>
-          <v-text-field
-            v-model="id"
-            label="Id"
-            required
-          ></v-text-field>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <v-text-field
-            v-model="title"
-            label="Title"
-            required
-          ></v-text-field>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <v-text-field
-            v-model="crawlTime"
-            label="crawlTime"
-            required
-          ></v-text-field>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <v-text-field
-            v-model="url"
-            label="url"
-            required
-          ></v-text-field>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <v-text-field
-            v-model="links"
-            label="Links"
-            required
-          ></v-text-field>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-btn v-on:click="clicked()">
-          Odeslat
-        </v-btn>
-      </v-row>
+    <h1>Visualisation</h1>
+    <svg id="svg" ref="svg" width="100%" height="60vh">
+    <g>
+      <template v-for="(c, index) in links">
+        <tree-link class="movable" v-bind:key="index" v-bind:linkData="c"></tree-link>
+      </template>
+    </g>
+    <g>
+      <template v-for="(c, index) in circles">
+        <circle
+          v-bind:content="`
+            label: ${c.label}</br>
+            id: ${c.index}
+          `"
+          v-tippy='{interactive : true, animateFill: false, placement:"right", animation:"shift-toward", delay:100, arrow : true}'
+          class="circle"
+          :id="c.id"
+          :r="c.r"
+          :cx="c.x"
+          :cy="c.y"
+          :fill="c.fill"
+          :stroke="c.stroke"
+          :stroke-width="c.strokewidth"
+        >
+        </circle>
+        <tree-node class="movable" @nodeClicked="nodeClicked" v-bind:key="index" v-bind:nodeData="c"></tree-node>
+      </template>
+    </g>
+  </svg>
   </v-container>
 </template>
 
@@ -59,6 +37,7 @@
 import router from '../router'
 import NodeDataService from '../services/NodeDataService'
 import Node from '../models/Node'
+import * as d3 from 'd3'
 
 export default {
   name: 'Query',
