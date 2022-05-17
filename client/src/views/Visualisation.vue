@@ -11,6 +11,7 @@
     <g>
       <template v-for="(c, index) in circles">
         <circle
+          v-bind:key="index"
           v-bind:content="`
             label: ${c.label}</br>
             id: ${c.index}
