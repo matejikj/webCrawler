@@ -1,44 +1,46 @@
+const { bree } = require("../bree");
 const db = require("../models");
 const Webpage = db.webpages;
+const path = require('path');
+const appDir = path.resolve(__dirname);
 
 // Create and Save a new Webpage
 exports.create = (req, res) => {
-  // Validate request
-  if (!req.body.label) {
-    res.status(400).send({ message: "Content can not be empty!" });
-    return;
-  }
-
   console.log(req.body)
-
-  // identifier: String,
-  // label: String,
-  // url: String,
-  // regexp: String,
-  // tags: [String],
-  // active: Boolean
-
-  // Create a Webpage
   const webpage = new Webpage({
-    label: req.body.label,
     url: req.body.url,
     regexp: req.body.regexp,
-    tags: req.body.tags,
-    active: req.body.active
+    active: req.body.active,
+    labels: req.body.labels,
+    periodicity: req.body.periodicity,
+    labels: req.body.labels
   });
 
+  // bree.run('scraper-s')
+  bree.add({
+    name: `scraper-aa`,
+    path: path.join('/home/matejikj/git/webCrawler/server' + '/jobs', 'scraping.js'), // Using this path, be sure to set root to false *
+    interval: '5s',
+    worker: {
+      workerData: {
+        url: "https://jmatejik.eu",
+        regexp: "a[href^='/']"
+      }
+    },
+  });
+  bree.run('scraper-aa')
   // // Save Webpage in the database
-  webpage
-    .save()
-    .then(data => {
-      res.send(data);
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while creating the Webpage."
-      });
-    });
+  // webpage
+  //   .save()
+  //   .then(data => {
+  //     res.send(data);
+  //   })
+  //   .catch(err => {
+  //     res.status(500).send({
+  //       message:
+  //         err.message || "Some error occurred while creating the Webpage."
+  //     });
+  //   });
 };
 
 // Retrieve all Webpages from the database.
@@ -133,20 +135,6 @@ exports.deleteAll = (req, res) => {
       res.status(500).send({
         message:
           err.message || "Some error occurred while removing all Webpages."
-      });
-    });
-};
-
-// Find all published Webpages
-exports.findAllPublished = (req, res) => {
-  Webpage.find({ published: true })
-    .then(data => {
-      res.send(data);
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while retrieving Webpages."
       });
     });
 };

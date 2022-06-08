@@ -1,9 +1,8 @@
 <template>
-  <div v-if="isLogged">
+  <div>
     <v-app-bar
       dense
       height="26px"
-      color="grey accent-4"
     >
       <v-toolbar-items class="hidden-sm-and-down">
         <v-btn color="grey accent-4" v-for="item in menu" :key="item.title" :to="item.link">{{
@@ -34,7 +33,6 @@
             <v-list-item-title>{{ n.title }}</v-list-item-title>
           </v-list-item>
         </v-list>
-        <v-btn @click="logout">Odhlásit se</v-btn>
       </v-menu>
     </v-app-bar>
   </div>
@@ -48,19 +46,12 @@ export default {
   name: 'AppNavBar',
   data: () => ({
     menu: [
-      { title: 'Dřevo', link: '/drevo' },
-      { title: 'Hliník', link: '/hlinik' },
-      { title: 'Ocel', link: '/ocel' },
-      { title: 'Expedice', link: '/expedice' },
-      { title: 'Archiv', link: '/archiv' }
-      // { title: 'Historie', link: '/historie' },
-      // { title: 'Uživatelé', link: '/uzivatele' }
+      { title: 'Záznamy', link: '/' },
+      { title: 'Exekuce', link: '/executions' },
+      { title: 'Vizualizace', link: '/visualisation' }
     ]
   }),
   computed: {
-    isLogged () {
-      return this.$store.getters.isLoggedIn
-    }
   },
   methods: {
     navToAluminium: function () {

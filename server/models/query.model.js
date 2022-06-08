@@ -2,7 +2,7 @@ module.exports = mongoose => {
   var schema = mongoose.Schema(
     {
       websites: [],
-      nodes: {}
+      nodes: []
     },
     { timestamps: true }
   );
@@ -13,6 +13,6 @@ module.exports = mongoose => {
     return object;
   });
 
-  const WebPage = mongoose.model("query", schema);
-  return WebPage;
+  const Query = mongoose.model("query", schema);
+  return Query;
 };

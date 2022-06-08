@@ -5,5 +5,7 @@ module.exports = app => {
   
     // Create a new Tutorial
     router.post("/", queries.create);
+  
+    app.use("/queries", router);
   };
   

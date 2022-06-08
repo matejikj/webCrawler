@@ -2,7 +2,7 @@
   <v-container>
     <v-data-table
       :headers="headers"
-      :items="nodes"
+      :items="webpages"
       sort-by="calories"
       class="elevation-1"
     >
@@ -10,7 +10,7 @@
         <v-toolbar
           flat
         >
-          <v-toolbar-title>Nodes</v-toolbar-title>
+          <v-toolbar-title>Website records</v-toolbar-title>
           <v-divider
             class="mx-4"
             inset
@@ -29,7 +29,7 @@
                 v-bind="attrs"
                 v-on="on"
               >
-                New Item
+                Přidat záznam
               </v-btn>
             </template>
             <v-card>
@@ -40,50 +40,57 @@
               <v-card-text>
                 <v-container>
                   <v-row>
-        <v-col>
-          <v-text-field
-            v-model="id"
-            title="Id"
-            required
-          ></v-text-field>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <v-text-field
-            v-model="title"
-            title="Title"
-            required
-          ></v-text-field>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <v-text-field
-            v-model="crawlTime"
-            title="crawlTime"
-            required
-          ></v-text-field>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <v-text-field
-            v-model="url"
-            title="url"
-            required
-          ></v-text-field>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <v-text-field
-            v-model="links"
-            title="Links"
-            required
-          ></v-text-field>
-        </v-col>
-      </v-row>
+                    <v-col>
+                      <v-text-field
+                        v-model="url"
+                        label="url"
+                        required
+                      ></v-text-field>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col>
+                      <v-text-field
+                        v-model="label"
+                        label="label"
+                        required
+                      ></v-text-field>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col>
+                      <v-text-field
+                        v-model="regexp"
+                        label="regexp"
+                        required
+                      ></v-text-field>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col>
+                      <v-checkbox
+                        v-model="active"
+                        label="active?"
+                      ></v-checkbox>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col>
+                      <v-select
+                        :items="periodicityItems"
+                        label="Periodicity"
+                      ></v-select>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col>
+                      <v-text-field
+                        v-model="tags"
+                        label="tags"
+                        required
+                      ></v-text-field>
+                    </v-col>
+                  </v-row>
                 </v-container>
               </v-card-text>
 
@@ -148,8 +155,8 @@
 
 <script>
 import router from '../router'
-import NodeDataService from '../services/NodeDataService'
-import Node from '../models/Node'
+import WebpageDataService from '../services/WebpageDataService'
+import Webpage from '../models/Webpage'
 
 export default {
   name: 'Query',
@@ -159,28 +166,29 @@ export default {
   },
   methods: {
     initialize () {
-      NodeDataService.getAll().then((data) => {
-        this.nodes = data.data
+      WebpageDataService.getAll().then((data) => {
+        this.webpages = data.data
       })
-      // this.nodes = []
+      // this.webpages = []
     },
     editItem (item) {
-      this.editedIndex = this.nodes.indexOf(item)
+      this.editedIndex = this.webpages.indexOf(item)
       this.$data.id = item.id
-      this.title = item.title
+      this.label = item.label
       this.url = item.url
-      this.crawlTime = item.crawlTime
-      this.links = item.links
-      this.owner = item.owner
+      this.regexp = item.regexp
+      this.tags = item.tags
+      this.periodicity = item.periodicity
+      this.active = item.active
       this.dialog = true
     },
     deleteItem (item) {
-      this.editedIndex = this.nodes.indexOf(item)
+      this.editedIndex = this.webpages.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.dialogDelete = true
     },
     deleteItemConfirm () {
-      this.nodes.splice(this.editedIndex, 1)
+      this.webpages.splice(this.editedIndex, 1)
       this.closeDelete()
     },
     close () {
@@ -199,37 +207,39 @@ export default {
     },
     save () {
       if (this.editedIndex > -1) {
-        if (typeof this.links === 'string') {
-          this.links = this.links.split(',')
+        if (typeof this.tags === 'string') {
+          this.tags = this.tags.split(',')
         }
         const data = {
           id: this.id,
-          title: this.title,
+          label: this.title,
           url: this.url,
-          crawlTime: this.crawlTime,
-          links: this.links,
-          owner: this.owner
+          regexp: this.crawlTime,
+          tags: this.links,
+          periodicity: this.owner,
+          active: this.active
         }
-        NodeDataService.update(data.id, data)
+        WebpageDataService.update(data.id, data)
           .then(response => {
             console.log(response.data)
           })
           .catch(e => {
             console.log(e)
           })
-        Object.assign(this.nodes[this.editedIndex], data)
+        Object.assign(this.webpages[this.editedIndex], data)
       } else {
-        const a = this.links.split(',')
-        this.links = a
+        const a = this.tags.split(',')
+        this.tags = a
         const data = {
           id: this.id,
-          title: this.title,
+          label: this.title,
           url: this.url,
-          crawlTime: this.crawlTime,
-          links: this.links,
-          owner: this.owner
+          regexp: this.crawlTime,
+          tags: this.links,
+          periodicity: this.owner,
+          active: this.active
         }
-        NodeDataService.create(data)
+        WebpageDataService.create(data)
           .then(response => {
             this.id = response.data.id
             console.log(response.data)
@@ -237,7 +247,7 @@ export default {
           .catch(e => {
             console.log(e)
           })
-        this.nodes.push(data)
+        this.webpages.push(data)
       }
       this.close()
     }
@@ -263,22 +273,25 @@ export default {
   },
   data: () => ({
     id: null,
-    title: 'fdsa',
+    label: 'fdsa',
     url: 'aa.com',
-    crawlTime: '22',
-    links: 'aaa, hhh, jjj',
-    owner: {},
+    regexp: '22',
+    tags: 'aaa, hhh, jjj',
+    active: false,
+    periodicity: 'hour',
+    periodicityItems: ['second', 'minute', 'hour', 'day'],
     dialog: false,
     dialogDelete: false,
     headers: [
-      { text: 'title', value: 'title' },
       { text: 'url', value: 'url' },
-      { text: 'crawlTime', value: 'crawlTime' },
-      { text: 'owner', value: 'owner' },
-      { text: 'links', value: 'links' },
+      { text: 'regexp', value: 'regexp' },
+      { text: 'label', value: 'label' },
+      { text: 'periodicity', value: 'periodicity' },
+      { text: 'active', value: 'active' },
+      { text: 'tags', value: 'tags' },
       { text: 'Actions', value: 'actions', sortable: false }
     ],
-    nodes: [],
+    webpages: [],
     editedIndex: -1
   })
 }

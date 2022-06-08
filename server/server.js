@@ -17,6 +17,8 @@ app.use(express.json());  /* bodyParser.json() is deprecated */
 app.use(express.urlencoded({ extended: true }));   /* bodyParser.urlencoded() is deprecated */
 
 const db = require("./models");
+const { bree } = require("./bree");
+const { myFunc } = require("./jobs/scraping");
 db.mongoose
   .connect(db.url, {
     useNewUrlParser: true,
@@ -39,8 +41,20 @@ require("./routes/nodes.routes")(app);
 require("./routes/queries.routes")(app);
 require("./routes/webpages.routes")(app);
 
+bree.start()
+// bree.on('worker created', (name) => {
+//   console.log('worker created', name);
+//   console.log(bree.workers.get(name));
+// });
+
+// bree.on('worker deleted', (name) => {
+//   console.log('worker deleted', name);
+//   console.log(!bree.worker.has(name));
+// });
+// bree.bree.start()
+// console.log(bree.bree.jobs)
 // set port, listen for requests
-const PORT = process.env.PORT || 8081;
+const PORT = process.env.PORT || 8083;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });

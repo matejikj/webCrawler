@@ -8,10 +8,7 @@ module.exports = app => {
   
     // Retrieve all webpages
     router.get("/", webpages.findAll);
-  
-    // Retrieve all published webpages
-    router.get("/published", webpages.findAllPublished);
-  
+    
     // Retrieve a single Tutorial with id
     router.get("/:id", webpages.findOne);
   

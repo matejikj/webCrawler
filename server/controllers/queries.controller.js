@@ -1,7 +1,6 @@
 const db = require("../models");
-const Node = db.nodes;
+const Query = db.queries;
 
-// Create and Save a new Node
+// Create and Save a new Query
 exports.create = (req, res) => {
-  // New query
 };

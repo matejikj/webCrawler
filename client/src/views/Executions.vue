@@ -10,7 +10,7 @@
         <v-toolbar
           flat
         >
-          <v-toolbar-title>Webpages</v-toolbar-title>
+          <v-toolbar-title>Website records</v-toolbar-title>
           <v-divider
             class="mx-4"
             inset
@@ -29,7 +29,7 @@
                 v-bind="attrs"
                 v-on="on"
               >
-                New Item
+                Přidat záznam
               </v-btn>
             </template>
             <v-card>
@@ -42,8 +42,8 @@
                   <v-row>
                     <v-col>
                       <v-text-field
-                        v-model="id"
-                        label="Id"
+                        v-model="url"
+                        label="url"
                         required
                       ></v-text-field>
                     </v-col>
@@ -68,22 +68,20 @@
                   </v-row>
                   <v-row>
                     <v-col>
-                      <v-text-field
-                        v-model="url"
-                        label="url"
-                        required
-                      ></v-text-field>
-                    </v-col>
-                  </v-row>
-                  <v-row>
-                    <v-col>
                       <v-checkbox
                         v-model="active"
                         label="active?"
                       ></v-checkbox>
                     </v-col>
                   </v-row>
-
+                  <v-row>
+                    <v-col>
+                      <v-select
+                        :items="periodicityItems"
+                        label="Periodicity"
+                      ></v-select>
+                    </v-col>
+                  </v-row>
                   <v-row>
                     <v-col>
                       <v-text-field
@@ -277,12 +275,15 @@ export default {
     regexp: '22',
     tags: 'aaa, hhh, jjj',
     active: false,
+    periodicity: 'hour',
+    periodicityItems: ['second', 'minute', 'hour', 'day'],
     dialog: false,
     dialogDelete: false,
     headers: [
-      { text: 'label', value: 'label' },
       { text: 'url', value: 'url' },
       { text: 'regexp', value: 'regexp' },
+      { text: 'label', value: 'label' },
+      { text: 'periodicity', value: 'periodicity' },
       { text: 'active', value: 'active' },
       { text: 'tags', value: 'tags' },
       { text: 'Actions', value: 'actions', sortable: false }

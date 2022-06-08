@@ -5,7 +5,8 @@ module.exports = mongoose => {
         url: String,
         regexp: String,
         tags: [String],
-        active: Boolean
+        active: Boolean,
+        periodicity: String
       },
       { timestamps: true }
     );
