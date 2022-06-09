@@ -5,7 +5,7 @@ var cheerio = require('cheerio');
 var URL = require('url-parse');
 
 async function main() {
-  console.log(Date.now())
+  console.log(Date())
   if (workerData) {
     pagesVisited = {};
     pagesToVisit = [];
@@ -16,18 +16,23 @@ async function main() {
       var nextPage = pagesToVisit.pop();
       if ( nextPage !== undefined && pagesVisited[nextPage] === undefined ) {
         console.log(nextPage)
+        var t0 = performance.now();
         pagesVisited[nextPage] = true;
         numPagesVisited++;
         let res = await axios(nextPage)
         var $ = cheerio.load(res.data);
+        var title = $("title").text();
         var relativeLinks = $(workerData.regexp);
         relativeLinks.each(function() {
           pagesToVisit.push(workerData.url + $(this).attr('href'));
         });
+        console.log()
+        var t1 = performance.now();
+        console.log(t1 - t0)
+        console.log(title)
       }
-      console.log("DELKAAA ", pagesToVisit.length)
     }
-    console.log(Date.now())
+    console.log(Date())
     console.log('CRAWLING ONE DONE')
   }
 }

@@ -1,5 +1,7 @@
 <template>
   <v-container>
+    <h1>Test</h1>
+    <a href="https://jmatejik.eu/">odkaz 1</a>
     <v-data-table
       :headers="headers"
       :items="webpages"
@@ -78,6 +80,7 @@
                     <v-col>
                       <v-select
                         :items="periodicityItems"
+                        v-model="periodicity"
                         label="Periodicity"
                       ></v-select>
                     </v-col>
@@ -177,12 +180,13 @@ export default {
       this.label = item.label
       this.url = item.url
       this.regexp = item.regexp
-      this.tags = item.tags
+      this.tags = item.tags.join()
       this.periodicity = item.periodicity
       this.active = item.active
       this.dialog = true
     },
     deleteItem (item) {
+      WebpageDataService.delete(item.id)
       this.editedIndex = this.webpages.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.dialogDelete = true
@@ -207,16 +211,14 @@ export default {
     },
     save () {
       if (this.editedIndex > -1) {
-        if (typeof this.tags === 'string') {
-          this.tags = this.tags.split(',')
-        }
+        const tagSplit = this.tags.split(',')
         const data = {
           id: this.id,
-          label: this.title,
+          label: this.label,
           url: this.url,
-          regexp: this.crawlTime,
-          tags: this.links,
-          periodicity: this.owner,
+          regexp: this.regexp,
+          tags: tagSplit,
+          periodicity: this.periodicity,
           active: this.active
         }
         WebpageDataService.update(data.id, data)
@@ -228,15 +230,13 @@ export default {
           })
         Object.assign(this.webpages[this.editedIndex], data)
       } else {
-        const a = this.tags.split(',')
-        this.tags = a
+        const tagSplit = this.tags.split(',')
         const data = {
-          id: this.id,
-          label: this.title,
+          label: this.label,
           url: this.url,
-          regexp: this.crawlTime,
-          tags: this.links,
-          periodicity: this.owner,
+          regexp: this.regexp,
+          tags: tagSplit,
+          periodicity: this.periodicity,
           active: this.active
         }
         WebpageDataService.create(data)
@@ -273,13 +273,13 @@ export default {
   },
   data: () => ({
     id: null,
-    label: 'fdsa',
-    url: 'aa.com',
-    regexp: '22',
-    tags: 'aaa, hhh, jjj',
+    label: 'test',
+    url: 'https://jmatejik.eu',
+    regexp: "a[href^='/']",
+    tags: 'test, smycka',
     active: false,
     periodicity: 'hour',
-    periodicityItems: ['second', 'minute', 'hour', 'day'],
+    periodicityItems: ['minute', 'hour', 'day'],
     dialog: false,
     dialogDelete: false,
     headers: [

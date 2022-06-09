@@ -3,44 +3,72 @@ const db = require("../models");
 const Webpage = db.webpages;
 const path = require('path');
 const appDir = path.resolve(__dirname);
+var mongoose = require('mongoose');
+
+function getPeriodicity(periodicity) {
+  switch (periodicity) {
+    case 'hour':
+      return "5s"
+    case 'minute':
+      return "60s"
+    case 'day':
+      return "86400s"
+  }
+}
 
 // Create and Save a new Webpage
 exports.create = (req, res) => {
-  console.log(req.body)
-  const webpage = new Webpage({
-    url: req.body.url,
-    regexp: req.body.regexp,
-    active: req.body.active,
-    labels: req.body.labels,
-    periodicity: req.body.periodicity,
-    labels: req.body.labels
-  });
-
-  // bree.run('scraper-s')
-  bree.add({
-    name: `scraper-aa`,
-    path: path.join('/home/matejikj/git/webCrawler/server' + '/jobs', 'scraping.js'), // Using this path, be sure to set root to false *
-    interval: '5s',
-    worker: {
-      workerData: {
-        url: "https://jmatejik.eu",
-        regexp: "a[href^='/']"
+  Webpage.find({ url: req.body.url })
+    .then(findRes => {
+      if (findRes.length === 0) {
+        const webpage = new Webpage({
+          url: req.body.url,
+          regexp: req.body.regexp,
+          active: req.body.active,
+          label: req.body.label,
+          periodicity: req.body.periodicity,
+          tags: req.body.tags
+        });
+      
+        let newScraperName = "scraper-" + webpage.url
+        
+        bree.add({
+          name: newScraperName,
+          path: path.join('/home/matejikj/git/webCrawler/server' + '/jobs', 'scraping.js'), // Using this path, be sure to set root to false *
+          timeout: "1s",
+          interval: getPeriodicity(req.body.periodicity),
+          worker: {
+            workerData: {
+              url: webpage.url,
+              regexp: webpage.regexp
+            }
+          },
+        });
+        bree.start(newScraperName)
+        webpage
+          .save()
+          .then(data => {
+            res.send(data);
+          })
+          .catch(err => {
+            res.status(500).send({
+              message:
+                err.message || "Some error occurred while creating the Webpage."
+            });
+          });
+      } else {
+        res.status(200).send({
+          message:
+            "Url is existing"
+        });
       }
-    },
-  });
-  bree.run('scraper-aa')
-  // // Save Webpage in the database
-  // webpage
-  //   .save()
-  //   .then(data => {
-  //     res.send(data);
-  //   })
-  //   .catch(err => {
-  //     res.status(500).send({
-  //       message:
-  //         err.message || "Some error occurred while creating the Webpage."
-  //     });
-  //   });
+    })
+    .catch(err => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while retrieving Webpages"
+      });
+    });  
 };
 
 // Retrieve all Webpages from the database.
@@ -60,18 +88,15 @@ exports.findAll = (req, res) => {
 
 // Find a single Webpage with an id
 exports.findOne = (req, res) => {
-  const id = req.params.id;
-
-  Webpage.findById(id)
+  Webpage.find({ url: req })
     .then(data => {
-      if (!data)
-        res.status(404).send({ message: "Not found Webpage with id " + id });
-      else res.send(data);
+      res.send(data);
     })
     .catch(err => {
-      res
-        .status(500)
-        .send({ message: "Error retrieving Webpage with id=" + id });
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while retrieving Webpages."
+      });
     });
 };
 
@@ -103,7 +128,7 @@ exports.update = (req, res) => {
 // Delete a Webpage with the specified id in the request
 exports.delete = (req, res) => {
   const id = req.params.id;
-
+  console.log(id)
   Webpage.findByIdAndRemove(id, { useFindAndModify: false })
     .then(data => {
       if (!data) {
@@ -125,7 +150,7 @@ exports.delete = (req, res) => {
 
 // Delete all Webpages from the database.
 exports.deleteAll = (req, res) => {
-  Webpage.deleteMany({})
+  Webpage.delete({_id: req})
     .then(data => {
       res.send({
         message: `${data.deletedCount} Webpages were deleted successfully!`
