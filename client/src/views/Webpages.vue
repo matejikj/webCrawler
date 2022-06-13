@@ -186,12 +186,13 @@ export default {
       this.dialog = true
     },
     deleteItem (item) {
-      WebpageDataService.delete(item.id)
       this.editedIndex = this.webpages.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.dialogDelete = true
     },
     deleteItemConfirm () {
+      console.log(this.editedItem.id)
+      WebpageDataService.delete(this.editedItem.id)
       this.webpages.splice(this.editedIndex, 1)
       this.closeDelete()
     },
@@ -221,6 +222,7 @@ export default {
           periodicity: this.periodicity,
           active: this.active
         }
+        console.log(data)
         WebpageDataService.update(data.id, data)
           .then(response => {
             console.log(response.data)
@@ -241,13 +243,13 @@ export default {
         }
         WebpageDataService.create(data)
           .then(response => {
+            this.webpages.push(response.data)
             this.id = response.data.id
             console.log(response.data)
           })
           .catch(e => {
             console.log(e)
           })
-        this.webpages.push(data)
       }
       this.close()
     }

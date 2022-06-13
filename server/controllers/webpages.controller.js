@@ -16,8 +16,46 @@ function getPeriodicity(periodicity) {
   }
 }
 
+function getScraperName(url) {
+  return "scraper-" + url
+}
+
+function addBreeJob(item) {
+  console.log(item)
+  console.log(item.id)
+  bree.add({
+    name: getScraperName(item.id),
+    path: path.join('/home/matejikj/git/webCrawler/server' + '/jobs', 'scraping.js'), // Using this path, be sure to set root to false *
+    timeout: "1s",
+    interval: getPeriodicity(item.periodicity),
+    worker: {
+      workerData: {
+        url: item.url,
+        regexp: item.regexp
+      }
+    },
+  });
+  console.log(item.id)
+
+  bree.start(getScraperName(item.id))
+}
+
+function removeBreeJob(url) {
+  console.log("MAZU")
+  bree.stop(getScraperName(url))
+  console.log(bree.workers)
+  try {
+    bree.remove(getScraperName(url))
+  } catch (error) {
+    console.log(bree.workers)
+    console.log(error) 
+  }
+}
+
+
 // Create and Save a new Webpage
 exports.create = (req, res) => {
+  console.log(Webpage)
   Webpage.find({ url: req.body.url })
     .then(findRes => {
       if (findRes.length === 0) {
@@ -29,25 +67,10 @@ exports.create = (req, res) => {
           periodicity: req.body.periodicity,
           tags: req.body.tags
         });
-      
-        let newScraperName = "scraper-" + webpage.url
-        
-        bree.add({
-          name: newScraperName,
-          path: path.join('/home/matejikj/git/webCrawler/server' + '/jobs', 'scraping.js'), // Using this path, be sure to set root to false *
-          timeout: "1s",
-          interval: getPeriodicity(req.body.periodicity),
-          worker: {
-            workerData: {
-              url: webpage.url,
-              regexp: webpage.regexp
-            }
-          },
-        });
-        bree.start(newScraperName)
         webpage
           .save()
           .then(data => {
+            addBreeJob(data)
             res.send(data);
           })
           .catch(err => {
@@ -68,7 +91,7 @@ exports.create = (req, res) => {
         message:
           err.message || "Some error occurred while retrieving Webpages"
       });
-    });  
+    });
 };
 
 // Retrieve all Webpages from the database.
@@ -108,15 +131,20 @@ exports.update = (req, res) => {
     });
   }
 
-  const id = req.params.id;
+  let id = req.params.id
   console.log(id)
+  console.log(req.body.url)
   Webpage.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
     .then(data => {
       if (!data) {
         res.status(404).send({
           message: `Cannot update Webpage with id=${id}. Maybe Webpage was not found!`
         });
-      } else res.send({ message: "Webpage was updated successfully." });
+      } else {
+        removeBreeJob(id)
+        addBreeJob(req.body)
+        res.send({ message: "Webpage was updated successfully." });
+      }
     })
     .catch(err => {
       res.status(500).send({
@@ -127,7 +155,9 @@ exports.update = (req, res) => {
 
 // Delete a Webpage with the specified id in the request
 exports.delete = (req, res) => {
+  console.log("req.params.url")
   const id = req.params.id;
+
   console.log(id)
   Webpage.findByIdAndRemove(id, { useFindAndModify: false })
     .then(data => {
@@ -136,6 +166,8 @@ exports.delete = (req, res) => {
           message: `Cannot delete Webpage with id=${id}. Maybe Webpage was not found!`
         });
       } else {
+        console.log("SMAZANO")
+        removeBreeJob(req.params.id)
         res.send({
           message: "Webpage was deleted successfully!"
         });

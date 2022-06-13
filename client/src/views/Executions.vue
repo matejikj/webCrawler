@@ -1,8 +1,9 @@
 <template>
   <v-container>
+    <h1>Test</h1>
     <v-data-table
       :headers="headers"
-      :items="webpages"
+      :items="executions"
       sort-by="calories"
       class="elevation-1"
     >
@@ -10,109 +11,13 @@
         <v-toolbar
           flat
         >
-          <v-toolbar-title>Website records</v-toolbar-title>
+          <v-toolbar-title>Executions</v-toolbar-title>
           <v-divider
             class="mx-4"
             inset
             vertical
           ></v-divider>
           <v-spacer></v-spacer>
-          <v-dialog
-            v-model="dialog"
-            max-width="500px"
-          >
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                color="primary"
-                dark
-                class="mb-2"
-                v-bind="attrs"
-                v-on="on"
-              >
-                Přidat záznam
-              </v-btn>
-            </template>
-            <v-card>
-              <v-card-title>
-                <span class="text-h5">{{ formTitle }}</span>
-              </v-card-title>
-
-              <v-card-text>
-                <v-container>
-                  <v-row>
-                    <v-col>
-                      <v-text-field
-                        v-model="url"
-                        label="url"
-                        required
-                      ></v-text-field>
-                    </v-col>
-                  </v-row>
-                  <v-row>
-                    <v-col>
-                      <v-text-field
-                        v-model="label"
-                        label="label"
-                        required
-                      ></v-text-field>
-                    </v-col>
-                  </v-row>
-                  <v-row>
-                    <v-col>
-                      <v-text-field
-                        v-model="regexp"
-                        label="regexp"
-                        required
-                      ></v-text-field>
-                    </v-col>
-                  </v-row>
-                  <v-row>
-                    <v-col>
-                      <v-checkbox
-                        v-model="active"
-                        label="active?"
-                      ></v-checkbox>
-                    </v-col>
-                  </v-row>
-                  <v-row>
-                    <v-col>
-                      <v-select
-                        :items="periodicityItems"
-                        label="Periodicity"
-                      ></v-select>
-                    </v-col>
-                  </v-row>
-                  <v-row>
-                    <v-col>
-                      <v-text-field
-                        v-model="tags"
-                        label="tags"
-                        required
-                      ></v-text-field>
-                    </v-col>
-                  </v-row>
-                </v-container>
-              </v-card-text>
-
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn
-                  color="blue darken-1"
-                  text
-                  @click="close"
-                >
-                  Cancel
-                </v-btn>
-                <v-btn
-                  color="blue darken-1"
-                  text
-                  @click="save"
-                >
-                  Save
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
           <v-dialog v-model="dialogDelete" max-width="500px">
             <v-card>
               <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
@@ -155,8 +60,7 @@
 
 <script>
 import router from '../router'
-import WebpageDataService from '../services/WebpageDataService'
-import Webpage from '../models/Webpage'
+import ExecutionDataService from '../services/ExecutionDataService'
 
 export default {
   name: 'Query',
@@ -166,28 +70,33 @@ export default {
   },
   methods: {
     initialize () {
-      WebpageDataService.getAll().then((data) => {
-        this.webpages = data.data
+      ExecutionDataService.getAll().then((data) => {
+        // console.log(data.data)
+        // data.data.foreach( x => {
+        //   console.log(x.label)
+        // })
+        this.executions = []
+        data.data.forEach(x => {
+          const label = x.label
+          console.log(x)
+          x.executions.forEach(y => {
+            y.label = label
+            this.executions.push(y)
+          })
+        })
+        console.log(this.executions)
       })
-      // this.webpages = []
-    },
-    editItem (item) {
-      this.editedIndex = this.webpages.indexOf(item)
-      this.$data.id = item.id
-      this.title = item.title
-      this.url = item.url
-      this.crawlTime = item.crawlTime
-      this.links = item.links
-      this.owner = item.owner
-      this.dialog = true
+      // this.executions = []
     },
     deleteItem (item) {
-      this.editedIndex = this.webpages.indexOf(item)
+      this.editedIndex = this.executions.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.dialogDelete = true
     },
     deleteItemConfirm () {
-      this.webpages.splice(this.editedIndex, 1)
+      console.log(this.editedItem.id)
+      ExecutionDataService.delete(this.editedItem.id)
+      this.executions.splice(this.editedIndex, 1)
       this.closeDelete()
     },
     close () {
@@ -206,45 +115,44 @@ export default {
     },
     save () {
       if (this.editedIndex > -1) {
-        if (typeof this.tags === 'string') {
-          this.tags = this.tags.split(',')
-        }
+        const tagSplit = this.tags.split(',')
         const data = {
           id: this.id,
-          title: this.title,
+          label: this.label,
           url: this.url,
-          crawlTime: this.crawlTime,
-          links: this.links,
-          owner: this.owner
+          regexp: this.regexp,
+          tags: tagSplit,
+          periodicity: this.periodicity,
+          active: this.active
         }
-        WebpageDataService.update(data.id, data)
+        console.log(data)
+        ExecutionDataService.update(data.id, data)
           .then(response => {
             console.log(response.data)
           })
           .catch(e => {
             console.log(e)
           })
-        Object.assign(this.webpages[this.editedIndex], data)
+        Object.assign(this.executions[this.editedIndex], data)
       } else {
-        const a = this.tags.split(',')
-        this.tags = a
+        const tagSplit = this.tags.split(',')
         const data = {
-          id: this.id,
-          title: this.title,
+          label: this.label,
           url: this.url,
-          crawlTime: this.crawlTime,
-          links: this.links,
-          owner: this.owner
+          regexp: this.regexp,
+          tags: tagSplit,
+          periodicity: this.periodicity,
+          active: this.active
         }
-        WebpageDataService.create(data)
+        ExecutionDataService.create(data)
           .then(response => {
+            this.executions.push(response.data)
             this.id = response.data.id
             console.log(response.data)
           })
           .catch(e => {
             console.log(e)
           })
-        this.webpages.push(data)
       }
       this.close()
     }
@@ -270,25 +178,24 @@ export default {
   },
   data: () => ({
     id: null,
-    label: 'fdsa',
-    url: 'aa.com',
-    regexp: '22',
-    tags: 'aaa, hhh, jjj',
+    label: 'test',
+    url: 'https://jmatejik.eu',
+    regexp: "a[href^='/']",
+    tags: 'test, smycka',
     active: false,
     periodicity: 'hour',
-    periodicityItems: ['second', 'minute', 'hour', 'day'],
+    periodicityItems: ['minute', 'hour', 'day'],
     dialog: false,
     dialogDelete: false,
     headers: [
-      { text: 'url', value: 'url' },
-      { text: 'regexp', value: 'regexp' },
       { text: 'label', value: 'label' },
-      { text: 'periodicity', value: 'periodicity' },
-      { text: 'active', value: 'active' },
-      { text: 'tags', value: 'tags' },
+      { text: 'status', value: 'status' },
+      { text: 'start', value: 'start' },
+      { text: 'end', value: 'end' },
+      { text: 'sitesCrawled', value: 'sitesCrawled' },
       { text: 'Actions', value: 'actions', sortable: false }
     ],
-    webpages: [],
+    executions: [],
     editedIndex: -1
   })
 }

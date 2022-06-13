@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import Webpages from './views/Webpages.vue'
 import Visualisation from './views/Visualisation.vue'
+import Executions from './views/Executions.vue'
 
 Vue.use(VueRouter)
 
@@ -11,11 +12,11 @@ const routes: Array<RouteConfig> = [
     name: 'Webpages',
     component: Webpages
   },
-  // {
-  //   path: '/executions',
-  //   name: 'Executions',
-  //   component: Executions
-  // },
+  {
+    path: '/executions',
+    name: 'Executions',
+    component: Executions
+  },
   {
     path: '/visualisation',
     name: 'Visualisation',
