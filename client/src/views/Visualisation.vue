@@ -45,7 +45,7 @@
             v-bind:key='(i+1) * 100 + 1'
             :cx="coords[i].x"
             :cy="coords[i].y"
-            :r="20" :fill="colors[Math.ceil(Math.sqrt(node.index))]"
+            :r="20" :fill="node.color"
             stroke="white" stroke-width="1"
           />
 
@@ -60,7 +60,6 @@
         </svg>
       </v-col>
     </v-row>
-    
   </v-container>
 </template>
 
@@ -69,7 +68,7 @@ import router from '../router'
 import NodeDataService from '../services/NodeDataService'
 import WebpageDataService from '../services/WebpageDataService'
 import * as d3 from 'd3'
-import { select } from 'd3'
+import { link, select } from 'd3'
 
 export default {
   name: 'Query',
@@ -79,7 +78,46 @@ export default {
   },
   methods: {
     switchChanged () {
-      console.log(this.select)
+      if (this.switch1) {
+        let myArray = []
+        const links = []
+        myArray = this.graph.nodes.map(x => {
+          const domain = (new URL(x.id)).hostname
+          if (links[domain] === undefined) {
+            links[domain] = []
+          }
+          x.links.forEach(y => links[domain].push((new URL(y)).hostname))
+          return domain
+        })
+        myArray = [...new Set(myArray)]
+        for (const key in links) {
+          links[key] = [...new Set(links[key])]
+        }
+        console.log(myArray)
+        this.graph.nodes = []
+        this.graph.links = []
+        myArray.forEach(x => {
+          this.graph.nodes.push({
+            id: x,
+            label: x
+          })
+        })
+        myArray.forEach(domain => {
+          links[domain].forEach(link => {
+            const left = this.graph.nodes.find(y => y.id === domain)
+            const right = this.graph.nodes.find(y => y.id === link)
+            this.graph.links.push({
+              source: this.graph.nodes.indexOf(left),
+              target: this.graph.nodes.indexOf(right)
+            })
+          })
+        })
+        console.log(this.graph.nodes)
+        console.log(this.graph.links)
+        this.initializeGraph()
+      } else {
+        this.initialize()
+      }
     },
     initialize () {
       NodeDataService.getAll().then((data) => {
@@ -89,7 +127,7 @@ export default {
         // })
         this.graph.nodes = []
         this.graph.links = []
-        let visitedNodes = []
+        const visitedNodes = []
         console.log(data.data)
         data.data.forEach(webpage => {
           const label = webpage.label
@@ -98,21 +136,26 @@ export default {
               visitedNodes.push(node.url)
               this.graph.nodes.push({
                 id: node.url,
-                label: node.url
+                label: node.url,
+                color: 'green',
+                links: node.links
               })
             } else {
-              let finded = this.graph.nodes.find(x => x.id === node.url)
+              const finded = this.graph.nodes.find(x => x.id === node.url)
               finded.label = node.url
+              finded.links = node.links
             }
             node.links.forEach(link => {
               if (visitedNodes.indexOf(link) === -1) {
                 visitedNodes.push(link)
                 this.graph.nodes.push({
-                  id: link
+                  id: link,
+                  color: 'grey',
+                  links: []
                 })
               }
-              let left = this.graph.nodes.find(x => x.id === node.url)
-              let right = this.graph.nodes.find(x => x.id === link)
+              const left = this.graph.nodes.find(x => x.id === node.url)
+              const right = this.graph.nodes.find(x => x.id === link)
               this.graph.links.push({
                 source: this.graph.nodes.indexOf(left),
                 target: this.graph.nodes.indexOf(right)
@@ -175,9 +218,10 @@ export default {
     console.log('AA')
   },
   data: () => ({
-    switch1: true,
+    switch1: false,
     select: [],
     items: [],
+    nodes: [],
     graph: {
       nodes: [],
       links: []
@@ -185,7 +229,7 @@ export default {
     width: Math.max(document.documentElement.clientWidth - 150, window.innerWidth - 150 || 0),
     height: Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
     padding: 20,
-    colors: ['#2196F3', '#E91E63', '#7E57C2', '#009688', '#00BCD4', '#EF6C00', '#4CAF50', '#FF9800', '#F44336', '#CDDC39', '#9C27B0'],
+    colors: ['#2196F3', '#E91E63', '#7E57C2', '#009688', '#00BCD4', '#EF6C00', '#4CAF50', '#FF9800', '#F44336', '#CDDC39', '#9C27B0']
   })
 }
 </script>

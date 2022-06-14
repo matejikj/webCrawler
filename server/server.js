@@ -34,6 +34,41 @@ var root = {
   },
 };
 
+var url_list = ["https://www.facebook.com/impression.php/f2e61d9df/?lid=115",
+"https://www.facebook.com/plugins/like.php?app_id=5",
+"https://www.facebook.com/tr/a/?id=228037074239568",
+"https://www.facebook.com/tr/b/?ev=ViewContent",
+"http://www.marvel.com/abc?f=33",
+"http://www.marvel.com/games?a=11",
+"http://www.marvel.com/games?z=22",
+"http://www.marvel.com/videos"];
+
+// Group the URLs, keyed by domain+dir
+var hash = url_list.reduce(function (hash, url) {
+    // ignore protocol, and extract domain and first dir:
+    console.log(hash)
+    console.log(url)
+    var domAndDir = url.replace(/^.*?:\/\//, '').match(/^.*?\..*?\/[^\/?#]*/)[0];
+    hash[domAndDir] = (hash[domAndDir] || []).concat(url);
+    return hash;
+}, {});
+
+// Regroup URLs by domain only, when they are alone for their domain+dir
+Object.keys(hash).forEach(function (domAndDir) {
+    if (hash[domAndDir].length == 1) {
+        var domain = domAndDir.match(/.*\//)[0];
+        hash[domain] = (hash[domain] || []).concat(hash[domAndDir]);
+        delete hash[domAndDir];
+    }
+});
+// Convert hash to array
+var result = Object.keys(hash).map(function(key) {
+    return hash[key];
+});
+
+// Output result
+console.log(result);
+
 app.use('/graphql', graphQLHTTP({ schema: Schema, rootValue: root, graphiql: true }))
 
 var query = 'query { todos { id, title, completed } }'  

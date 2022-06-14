@@ -275,7 +275,7 @@ export default {
     id: null,
     label: 'test',
     url: 'https://jmatejik.eu',
-    regexp: "a[href]",
+    regexp: 'a[href]',
     tags: 'test, smycka',
     active: false,
     periodicity: 'minute',
