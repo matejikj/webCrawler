@@ -61,7 +61,7 @@
             </marker>
           </defs>
           <line v-for="(link, i) in graph.links"
-                v-bind:key='(i+1) * 1000 + 1'
+                v-bind:key="`link-${i}`"
                 :x1="coords[link.source.index].x"
                 :y1="coords[link.source.index].y"
                 :x2="coords[link.target.index].x"
@@ -71,7 +71,7 @@
                 />
 
           <circle v-for="(node, i) in graph.nodes"
-            v-bind:key='(i+1) * 100 + 1'
+            v-bind:key="`circle-${i}`"
             :cx="coords[i].x"
             :cy="coords[i].y"
             :r="20" :fill="node.color"
@@ -81,7 +81,7 @@
           />
 
           <text v-for="(node, i) in graph.nodes"
-            v-bind:key='(i+1) * 10 + 1'
+            v-bind:key="`text-${i}`"
             :x="coords[i].x"
             :y="coords[i].y"
           >
