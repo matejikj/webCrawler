@@ -55,11 +55,17 @@ async function main() {
   
     while (pagesToVisit.length !== 0) {
       var nextPage = pagesToVisit.pop();
+      console.log(nextPage)
+      console.log(pagesVisited[nextPage])
       if ( nextPage !== undefined && pagesVisited[nextPage] === undefined ) {
-        console.log(nextPage)
+        console.log("vchod")
         var t0 = performance.now();
         pagesVisited[nextPage] = true;
         numPagesVisited++;
+        if (numPagesVisited > 20 ) {
+          pagesToVisit = []
+          continue
+        }
         let res = {}
         try {
           res = await axios(nextPage) 
@@ -70,14 +76,26 @@ async function main() {
         var title = $("title").text();
         var relativeLinks = $(workerData.regexp);
         var hrefs = []
+        console.log("KONEC")
         relativeLinks.each(function() {
-          if ($(this).attr('href')[0] === '/')
-            if (nextPage.search($(this).attr('href')) === -1)
-              pagesToVisit.push(nextPage + $(this).attr('href'));
-          else
-            pagesToVisit.push($(this).attr('href'));
-          hrefs.push($(this).attr('href'))
+          let attrHref = $(this).attr('href')
+          console.log(attrHref)
+          if (attrHref.includes('http')) {
+            console.log(attrHref)
+            pagesToVisit.push(attrHref);
+            hrefs.push(attrHref)
+            console.log("BEZ")
+          }
+          else {
+            console.log("AAAAAAAAA: ", nextPage + attrHref)
+            pagesToVisit.push(nextPage + attrHref);
+            hrefs.push(nextPage + attrHref)
+            console.log("S")
+          }
+          console.log("DALSI")
+          console.log(pagesToVisit)
         });
+        console.log("KONEC")
         var t1 = performance.now();
         const node = {
           title: title,

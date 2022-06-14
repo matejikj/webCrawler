@@ -1,7 +1,5 @@
 <template>
-  <v-container>
-    <h1>Test</h1>
-    <a href="https://jmatejik.eu/">odkaz 1</a>
+  <v-container fluid>
     <v-data-table
       :headers="headers"
       :items="webpages"
@@ -277,10 +275,10 @@ export default {
     id: null,
     label: 'test',
     url: 'https://jmatejik.eu',
-    regexp: "a[href^='/']",
+    regexp: "a[href]",
     tags: 'test, smycka',
     active: false,
-    periodicity: 'hour',
+    periodicity: 'minute',
     periodicityItems: ['minute', 'hour', 'day'],
     dialog: false,
     dialogDelete: false,

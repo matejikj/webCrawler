@@ -1,6 +1,5 @@
 <template>
-  <v-container>
-    <h1>Test</h1>
+  <v-container fluid>
     <v-data-table
       :headers="headers"
       :items="executions"

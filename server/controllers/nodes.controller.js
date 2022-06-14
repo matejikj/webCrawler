@@ -38,6 +38,38 @@ exports.create = (req, res) => {
 exports.findAll = (req, res) => {
   Webpage.find()
     .then(data => {
+      // graph = {
+      //   nodes: [],
+      //   links: []
+      // }
+      // data.forEach(webpage => {
+      //   const label = webpage.label
+      //   webpage.nodes.forEach(node => {
+      //     const newNode = {
+      //       id: node.url,
+      //       label: 'aa'
+      //     }
+      //     if (graph.nodes.indexOf(newNode) === -1) {
+      //       graph.nodes.push(newNode)
+      //     }
+      //     node.links.forEach(link => {
+      //       const newNodeLink = {
+      //         id: link,
+      //         label: 'aa'
+      //       }
+      //       if (graph.nodes.indexOf(newNodeLink) === -1) {
+      //         graph.nodes.push(newNodeLink)
+      //       }
+      //       const newLink = {
+      //         source: graph.nodes.indexOf(newNode),
+      //         target: graph.nodes.indexOf(newNodeLink)
+      //       }
+      //       if (graph.links.indexOf(newLink) === -1) {
+      //         graph.links.push(newLink)
+      //       }
+      //     })
+      //   })
+      // })
       res.send(data);
     })
     .catch(err => {
