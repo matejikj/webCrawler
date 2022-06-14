@@ -3,6 +3,35 @@
   <v-container fluid>
     <h1>Visualisation</h1>
     <v-row>
+      <v-dialog
+        v-model="dialog"
+        persistent
+        max-width="290"
+      >
+        <v-card>
+          <v-card-title class="text-h5">
+            Use Google's location service?
+          </v-card-title>
+          <v-card-text>Let Google help apps determine location. This means sending anonymous location data to Google, even when no apps are running.</v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="green darken-1"
+              text
+              @click="dialog = false"
+            >
+              Disagree
+            </v-btn>
+            <v-btn
+              color="green darken-1"
+              text
+              @click="dialog = false"
+            >
+              Agree
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
       <v-col cols="2">
         <v-switch
           v-model="switch1"
@@ -47,6 +76,8 @@
             :cy="coords[i].y"
             :r="20" :fill="node.color"
             stroke="white" stroke-width="1"
+            v-on:dblclick="funcao(node)"
+            class="circle"
           />
 
           <text v-for="(node, i) in graph.nodes"
@@ -77,6 +108,9 @@ export default {
   sockets: {
   },
   methods: {
+    funcao: function (node) {
+      this.dialog = true
+    },
     switchChanged () {
       if (this.switch1) {
         let myArray = []
@@ -218,6 +252,7 @@ export default {
     console.log('AA')
   },
   data: () => ({
+    dialog: false,
     switch1: false,
     select: [],
     items: [],
@@ -235,6 +270,11 @@ export default {
 </script>
 
 <style>
+.circle {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 .mujContainer {
   font-size: 0.8em;
   font-style: normal;
