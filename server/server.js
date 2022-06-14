@@ -2,6 +2,10 @@ const express = require("express");
 // const bodyParser = require("body-parser"); /* deprecated */
 const cors = require("cors");
 
+var graphql = require ('graphql').graphql  
+var graphQLHTTP = require('express-graphql')  
+var Schema = require('./schema')
+
 const app = express();
 
 var corsOptions = {
@@ -22,6 +26,19 @@ const { bree } = require("./bree");
 // simple route
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to bezkoder application." });
+});
+
+var root = {
+  hello: () => {
+    return 'Hello world!';
+  },
+};
+
+app.use('/graphql', graphQLHTTP({ schema: Schema, rootValue: root, graphiql: true }))
+
+var query = 'query { todos { id, title, completed } }'  
+graphql(Schema, query).then( function(result) {  
+  console.log(JSON.stringify(result,null," "));
 });
 
 require("./routes/nodes.routes")(app);

@@ -83,7 +83,7 @@ async function main() {
           title: title,
           url: nextPage,
           crawlTime: t1 - t0,
-          links: hrefs.join(),
+          links: hrefs,
           owner: workerData.url
         }
         links.push(node)
