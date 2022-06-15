@@ -15,6 +15,7 @@ const WebpageType = new GraphQLObjectType({
     identifier: { type: GraphQLID  },
     label: { type: GraphQLString },
     url: { type: GraphQLString },
+    periodicity: { type: GraphQLString },
     regexp: { type: GraphQLString },
     active: { type: GraphQLBoolean },
     tags: { type: GraphQLList(GraphQLString) }
@@ -37,23 +38,54 @@ const WebpageType = new GraphQLObjectType({
 // })
 
 const RootQuery = new GraphQLObjectType({
-   name: 'RootQueryType',
-   fields: {
-       webpage: {
-           type: WebpageType,
-           //argument passed by the user while making the query
-           args: { url: { type: GraphQLString } },
-           resolve(parent, args) {
-               return Webpage.findOne(args.url);
-           }
-       },
-       webpages:{
-           type: new GraphQLList(WebpageType),
-           resolve(parent, args) {
-               return Webpage.findAll({});
-           }
-       }
-   }
+  name: 'RootQueryType',
+  fields: {
+    webpage: {
+      type: WebpageType,
+      //argument passed by the user while making the query
+      args: { url: { type: GraphQLString } },
+      async resolve(parent, args) {
+        let res = {}
+        await Webpage.find({ url: args.url})
+          .then(data => {
+            node = {
+              identifier: data[0]._id,
+              url: data[0].url,
+              regexp: data[0].regexp,
+              active: data[0].active,
+              label: data[0].label,
+              periodicity: data[0].periodicity,
+              tags: data[0].tags
+            }
+            res = node
+          })
+        return res
+      }
+    },
+    webpages:{
+      type: new GraphQLList(WebpageType),
+      async resolve(parent, args) {
+        let arr = []
+        await Webpage.find()
+          .then(data => {
+            arr = data.map(x => {
+              node = {
+                identifier: x._id,
+                url: x.url,
+                regexp: x.regexp,
+                active: x.active,
+                label: x.label,
+                periodicity: x.periodicity,
+                tags: x.tags
+              }
+              return node
+            })
+            console.log(arr)
+          })
+        return arr
+      }
+    }
+  }
 });
 
 
