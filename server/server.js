@@ -3,8 +3,8 @@ const express = require("express");
 const cors = require("cors");
 
 var graphql = require ('graphql').graphql  
-var graphQLHTTP = require('express-graphql')  
-var Schema = require('./schema')
+const { graphqlHTTP } = require('express-graphql');
+const mySchema = require('./schema')
 
 const app = express();
 
@@ -28,19 +28,13 @@ app.get("/", (req, res) => {
   res.json({ message: "Welcome to bezkoder application." });
 });
 
-var root = {
-  hello: () => {
-    return 'Hello world!';
-  },
-};
-
-app.use('/graphql', graphQLHTTP({ schema: Schema, rootValue: root, graphiql: true }))
-
-var query = 'query { todos { id, title, completed } }'  
-graphql(Schema, query).then( function(result) {  
-  console.log(JSON.stringify(result,null," "));
-});
-
+app.use(
+  '/graphql',
+  graphqlHTTP({
+    schema: mySchema,
+    graphiql: true,
+  }),
+);
 require("./routes/nodes.routes")(app);
 require("./routes/queries.routes")(app);
 require("./routes/webpages.routes")(app);
