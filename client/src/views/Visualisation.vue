@@ -35,17 +35,29 @@
       <v-col cols="2">
         <v-switch
           v-model="switch1"
-          label="dfas"
+          label="Zobrazit domény"
           @change="switchChanged()"
         ></v-switch>
         <v-combobox
           v-model="select"
           :items="items"
-          label="Combobox"
+          label="Vyber records"
           multiple
           outlined
           dense
         ></v-combobox>
+        <v-btn
+          @click="getVisualization"
+        >
+          Zobraz
+        </v-btn>
+        <v-icon
+            small
+            class="mr-2"
+            @click="editItem(item)"
+          >
+            mdi-pencil
+          </v-icon>
       </v-col>
       <v-col cols="10">
         <svg xmlns="http://www.w3.org/2000/svg"
@@ -54,8 +66,8 @@
           v-if="bounds.minX">
           <defs>
             <!-- arrowhead marker definition -->
-            <marker id="arrow" viewBox="0 0 10 10" refX="25" refY="5"
-                markerWidth="6" markerHeight="6"
+            <marker id="arrow" viewBox="0 0 10 10" refX="35" refY="5"
+                markerWidth="4" markerHeight="4"
                 orient="auto-start-reverse">
               <path d="M 0 0 L 10 5 L 0 10 z" />
             </marker>
@@ -66,27 +78,20 @@
                 :y1="coords[link.source.index].y"
                 :x2="coords[link.target.index].x"
                 :y2="coords[link.target.index].y"
-                stroke="black" stroke-width="2"
+                stroke="black" stroke-width="1"
                 marker-end="url(#arrow)"
                 />
 
           <circle v-for="(node, i) in graph.nodes"
+            v-tooltip="node.label"
             v-bind:key="`circle-${i}`"
             :cx="coords[i].x"
             :cy="coords[i].y"
-            :r="20" :fill="node.color"
+            :r="10" :fill="node.color"
             stroke="white" stroke-width="1"
             v-on:dblclick="funcao(node)"
             class="circle"
           />
-
-          <text v-for="(node, i) in graph.nodes"
-            v-bind:key="`text-${i}`"
-            :x="coords[i].x"
-            :y="coords[i].y"
-          >
-            {{ node.label }}
-          </text>
 
         </svg>
       </v-col>
@@ -100,16 +105,25 @@ import NodeDataService from '../services/NodeDataService'
 import WebpageDataService from '../services/WebpageDataService'
 import * as d3 from 'd3'
 import { link, select } from 'd3'
+import { VTooltip, VPopover, VClosePopover } from 'v-tooltip'
 
 export default {
   name: 'Query',
-  components: {
+  directives: {
+    VTooltip
   },
   sockets: {
   },
   methods: {
     funcao: function (node) {
       this.dialog = true
+    },
+    getVisualization () {
+      NodeDataService.getAll().then((data) => {
+        this.graph.nodes = data.data.nodes
+        this.graph.links = data.data.links
+        this.initializeGraph()
+      })
     },
     switchChanged () {
       if (this.switch1) {
@@ -127,7 +141,6 @@ export default {
         for (const key in links) {
           links[key] = [...new Set(links[key])]
         }
-        console.log(myArray)
         this.graph.nodes = []
         this.graph.links = []
         myArray.forEach(x => {
@@ -146,68 +159,14 @@ export default {
             })
           })
         })
-        console.log(this.graph.nodes)
-        console.log(this.graph.links)
         this.initializeGraph()
       } else {
-        this.initialize()
+        NodeDataService.getAll().then((data) => {
+          this.graph.nodes = data.data.nodes
+          this.graph.links = data.data.links
+          this.initializeGraph()
+        })
       }
-    },
-    initialize () {
-      NodeDataService.getAll().then((data) => {
-        // console.log(data.data)
-        // data.data.foreach( x => {
-        //   console.log(x.label)
-        // })
-        this.graph.nodes = []
-        this.graph.links = []
-        const visitedNodes = []
-        console.log(data.data)
-        data.data.forEach(webpage => {
-          const label = webpage.label
-          webpage.nodes.forEach(node => {
-            if (visitedNodes.indexOf(node.url) === -1) {
-              visitedNodes.push(node.url)
-              this.graph.nodes.push({
-                id: node.url,
-                label: node.url,
-                color: 'green',
-                links: node.links
-              })
-            } else {
-              const finded = this.graph.nodes.find(x => x.id === node.url)
-              finded.label = node.url
-              finded.links = node.links
-            }
-            node.links.forEach(link => {
-              if (visitedNodes.indexOf(link) === -1) {
-                visitedNodes.push(link)
-                this.graph.nodes.push({
-                  id: link,
-                  color: 'grey',
-                  links: []
-                })
-              }
-              const left = this.graph.nodes.find(x => x.id === node.url)
-              const right = this.graph.nodes.find(x => x.id === link)
-              this.graph.links.push({
-                source: this.graph.nodes.indexOf(left),
-                target: this.graph.nodes.indexOf(right)
-              })
-            })
-          })
-        })
-        console.log(this.graph.nodes)
-        console.log(this.graph.links)
-        this.initializeGraph()
-      })
-    },
-    initializeWebpages () {
-      NodeDataService.getAll().then((data) => {
-        data.data.forEach(x => {
-          this.items.push(x.url)
-        })
-      })
     },
     initializeGraph () {
       this.simulation = d3.forceSimulation(this.graph.nodes)
@@ -215,7 +174,6 @@ export default {
         .force('link', d3.forceLink(this.graph.links))
         .force('x', d3.forceX())
         .force('y', d3.forceY())
-      console.log(this.simulation)
     }
   },
   computed: {
@@ -245,11 +203,13 @@ export default {
     }
   },
   created () {
-    this.initialize()
-    this.initializeWebpages()
+    WebpageDataService.getAll().then((data) => {
+      data.data.forEach(x => {
+        this.items.push(x.url)
+      })
+    })
   },
   mounted () {
-    console.log('AA')
   },
   data: () => ({
     dialog: false,
@@ -270,6 +230,14 @@ export default {
 </script>
 
 <style>
+
+.tooltip-inner {
+    background: black;
+    color: white;
+    border-radius: 16px;
+    padding: 5px 10px 4px;
+  }
+
 .circle {
   cursor: pointer;
   text-decoration: underline;
