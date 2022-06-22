@@ -6,44 +6,6 @@ var URL = require('url-parse');
 const db = require('../models');
 const Webpage = db.webpages;
 
-async function addLinks(links, url) {
-  await Webpage.find({ url: url })
-    .then(findRes => {
-      if (findRes.length === 1) {
-        console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa")
-        console.log(findRes)
-        // Webpage
-        //   .update(
-        //     { url: url },
-        //     {
-        //       $set: {
-        //         nodes: links
-        //       }
-        //     })
-        //     .then(data => {
-        //       res.send(data);
-        //     })
-        //   .catch(err => {
-        //     res.status(500).send({
-        //       message:
-        //         err.message || "Some error occurred while creating the Webpage."
-        //     });
-        //   });
-      } else {
-        res.status(200).send({
-          message:
-            "Url is existing"
-        });
-      }
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while retrieving Webpages"
-      });
-    });
-}
-
 async function main() {
   if (workerData) {
     links = []
@@ -137,9 +99,6 @@ async function main() {
           $set: {
             "nodes": links
           }
-        })
-        .then(data => {
-          console.log(data);
         })
       .catch(err => {
         console.log(err)

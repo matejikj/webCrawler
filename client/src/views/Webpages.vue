@@ -175,7 +175,7 @@ import WebpageDataService from '../services/WebpageDataService'
 import Webpage from '../models/Webpage'
 
 export default {
-  name: 'Query',
+  name: 'Webapges',
   components: {
   },
   sockets: {

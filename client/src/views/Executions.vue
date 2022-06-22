@@ -44,7 +44,7 @@
 import ExecutionDataService from '../services/ExecutionDataService'
 
 export default {
-  name: 'Query',
+  name: 'Executions',
   components: {
   },
   sockets: {
@@ -68,6 +68,7 @@ export default {
   },
   mounted () {
     console.log('AA')
+    clearInterval()
   },
   data: () => ({
     headers: [

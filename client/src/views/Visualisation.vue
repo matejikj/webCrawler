@@ -6,28 +6,47 @@
       <v-dialog
         v-model="dialog"
         persistent
-        max-width="290"
+        max-width="600"
       >
         <v-card>
           <v-card-title class="text-h5">
-            Use Google's location service?
+            Node info
           </v-card-title>
-          <v-card-text>Let Google help apps determine location. This means sending anonymous location data to Google, even when no apps are running.</v-card-text>
+          <v-card-text v-if="this.dialogItem.isCrawled">
+            Crawled by websites:
+            <ul>
+              <li v-bind:key="`li-${index}`" v-for="(item, index) in this.dialogItem.crawledBy">
+                {{ item }}
+                <v-icon
+                  small
+                  class="mr-2"
+                  @click="runExecution(item)"
+                >
+                  mdi-arrow-right-drop-circle
+                </v-icon>
+              </li>
+            </ul>
+          </v-card-text>
+          <v-card-text v-if="!this.dialogItem.isCrawled">
+            URL: {{ this.dialogItem.id }}
+          </v-card-text>
+          <v-card-text v-if="!this.dialogItem.isCrawled">
+            <v-icon
+                  small
+                  class="mr-2"
+                  @click="addNewWebsiteRecord()"
+                >
+                  mdi-plus-circle
+                </v-icon>
+          </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn
-              color="green darken-1"
+              color="darken-1"
               text
               @click="dialog = false"
             >
-              Disagree
-            </v-btn>
-            <v-btn
-              color="green darken-1"
-              text
-              @click="dialog = false"
-            >
-              Agree
+              Zavřít
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -36,7 +55,12 @@
         <v-switch
           v-model="switch1"
           label="Zobrazit domény"
-          @change="switchChanged()"
+          @change="paintVis()"
+        ></v-switch>
+        <v-switch
+          v-model="switchLiveModeChecker"
+          label="Live mode"
+          @change="switchLiveMode()"
         ></v-switch>
         <v-combobox
           v-model="select"
@@ -47,7 +71,7 @@
           dense
         ></v-combobox>
         <v-btn
-          @click="getVisualization"
+          @click="paintVis"
         >
           Zobraz
         </v-btn>
@@ -89,7 +113,7 @@
             :cy="coords[i].y"
             :r="10" :fill="node.color"
             stroke="white" stroke-width="1"
-            v-on:dblclick="funcao(node)"
+            v-on:dblclick="showDialog(node)"
             class="circle"
           />
 
@@ -104,29 +128,64 @@ import router from '../router'
 import NodeDataService from '../services/NodeDataService'
 import WebpageDataService from '../services/WebpageDataService'
 import * as d3 from 'd3'
-import { link, select } from 'd3'
-import { VTooltip, VPopover, VClosePopover } from 'v-tooltip'
+import { VTooltip } from 'v-tooltip'
 
 export default {
-  name: 'Query',
+  name: 'Visualisation',
   directives: {
     VTooltip
   },
   sockets: {
   },
   methods: {
-    funcao: function (node) {
+    addNewWebsiteRecord: function (item) {
+      const data = {
+        label: this.dialogItem.id,
+        url: this.dialogItem.id,
+        regexp: 'a[href]',
+        tags: '',
+        periodicity: 'hour',
+        active: true
+      }
+      WebpageDataService.create(data)
+        .then(response => {
+          console.log(response)
+          this.switchLiveModeChecker = true
+          this.switchLiveMode()
+        })
+        .catch(e => {
+          console.log(e)
+        })
+    },
+    switchLiveMode: function () {
+      if (this.switchLiveModeChecker) {
+        this.myInterval = setInterval(this.setColor, 2000)
+      } else {
+        clearInterval(this.myInterval)
+      }
+    },
+    setColor: function () {
+      this.paintVis()
+    },
+    runExecution: function (item) {
+      console.log(item)
+    },
+    showDialog: function (node) {
+      this.dialogItem = node
+      console.log(this.dialogItem)
       this.dialog = true
     },
-    getVisualization () {
-      NodeDataService.getAll().then((data) => {
+    getVis () {
+      NodeDataService.getAll(this.select).then((data) => {
         this.graph.nodes = data.data.nodes
         this.graph.links = data.data.links
         this.initializeGraph()
       })
     },
-    switchChanged () {
-      if (this.switch1) {
+    getDomainVis () {
+      NodeDataService.getAll(this.select).then((data) => {
+        this.graph.nodes = data.data.nodes
+        this.graph.links = data.data.links
         let myArray = []
         const links = []
         myArray = this.graph.nodes.map(x => {
@@ -160,12 +219,13 @@ export default {
           })
         })
         this.initializeGraph()
+      })
+    },
+    paintVis () {
+      if (this.switch1) {
+        this.getDomainVis()
       } else {
-        NodeDataService.getAll().then((data) => {
-          this.graph.nodes = data.data.nodes
-          this.graph.links = data.data.links
-          this.initializeGraph()
-        })
+        this.getVis()
       }
     },
     initializeGraph () {
@@ -188,18 +248,10 @@ export default {
     coords () {
       return this.graph.nodes.map(node => {
         return {
-          x: (node.x - this.bounds.minX) * (this.width - 10 * this.padding) / (this.bounds.maxX - this.bounds.minX),
+          x: 10 + (node.x - this.bounds.minX) * (this.width - 2 * this.padding) / (this.bounds.maxX - this.bounds.minX),
           y: this.padding + (node.y - this.bounds.minY) * (this.height - 2 * this.padding) / (this.bounds.maxY - this.bounds.minY)
         }
       })
-    }
-  },
-  watch: {
-    dialog (val) {
-      val || this.close()
-    },
-    dialogDelete (val) {
-      val || this.closeDelete()
     }
   },
   created () {
@@ -209,11 +261,15 @@ export default {
       })
     })
   },
-  mounted () {
+  beforeDestroy () {
+    clearInterval(this.myInterval)
   },
   data: () => ({
+    myInterval: undefined,
+    switchLiveModeChecker: false,
     dialog: false,
     switch1: false,
+    dialogItem: {},
     select: [],
     items: [],
     nodes: [],
@@ -221,8 +277,8 @@ export default {
       nodes: [],
       links: []
     },
-    width: Math.max(document.documentElement.clientWidth - 150, window.innerWidth - 150 || 0),
-    height: Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
+    width: Math.max(document.documentElement.clientWidth * 9.8 / 12, window.innerWidth * 9 / 12 || 0),
+    height: Math.max(document.documentElement.clientHeight - 120, window.innerHeight - 120 || 0),
     padding: 20,
     colors: ['#2196F3', '#E91E63', '#7E57C2', '#009688', '#00BCD4', '#EF6C00', '#4CAF50', '#FF9800', '#F44336', '#CDDC39', '#9C27B0']
   })

@@ -7,7 +7,6 @@ const db = {};
 db.mongoose = mongoose;
 db.url = dbConfig.url;
 db.nodes = require("./node.model.js")(mongoose);
-db.queries = require("./query.model.js")(mongoose);
 db.webpages = require("./webpage.model.js")(mongoose);
 db.mongoose
   .connect(db.url, {
