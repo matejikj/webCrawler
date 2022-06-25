@@ -1,5 +1,28 @@
 <template>
   <v-container fluid>
+    <v-alert
+      v-if="alertVisible"
+      text
+      color="green"
+    >
+      <v-row
+        align="center"
+        no-gutters
+      >
+        <v-col class="grow">
+          Operace úspěšně dokončena.
+        </v-col>
+        <v-col class="shrink">
+          <v-btn
+            color="info"
+            outlined
+            v-on:click="alertVisible = false"
+          >
+            Okay
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-alert>
     <v-card>
       <v-data-table
         :headers="headers"
@@ -173,6 +196,7 @@
 import router from '../router'
 import WebpageDataService from '../services/WebpageDataService'
 import Webpage from '../models/Webpage'
+import ExecutionDataService from '../services/ExecutionDataService'
 
 export default {
   name: 'Webapges',
@@ -205,6 +229,22 @@ export default {
     },
     retry (item) {
       console.log(item)
+      const data = {
+        id: item.id,
+        label: item.label,
+        url: item.url,
+        regexp: item.regexp,
+        tags: item.tags,
+        periodicity: item.periodicity,
+        active: item.active
+      }
+      ExecutionDataService.create(data)
+        .then(response => {
+          this.alertVisible = true
+        })
+        .catch(e => {
+          console.log(e)
+        })
     },
     deleteItemConfirm () {
       console.log(this.editedItem.id)
@@ -299,6 +339,7 @@ export default {
     periodicity: 'minute',
     periodicityItems: ['minute', 'hour', 'day'],
     dialog: false,
+    alertVisible: false,
     dialogDelete: false,
     headers: [
       { text: 'url', value: 'url' },

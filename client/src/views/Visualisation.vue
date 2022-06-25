@@ -126,6 +126,7 @@
 <script>
 import router from '../router'
 import NodeDataService from '../services/NodeDataService'
+import ExecutionDataService from '../services/ExecutionDataService'
 import WebpageDataService from '../services/WebpageDataService'
 import * as d3 from 'd3'
 import { VTooltip } from 'v-tooltip'
@@ -138,6 +139,21 @@ export default {
   sockets: {
   },
   methods: {
+    runExecution (item) {
+      console.log(item)
+      const regexp = this.dialogItem.regexps.find(x => x.url === item)
+      const data = {
+        url: item,
+        regexp: regexp.regexp
+      }
+      ExecutionDataService.create(data)
+        .then(response => {
+          this.alertVisible = true
+        })
+        .catch(e => {
+          console.log(e)
+        })
+    },
     addNewWebsiteRecord: function (item) {
       const data = {
         label: this.dialogItem.id,
@@ -166,9 +182,6 @@ export default {
     },
     setColor: function () {
       this.paintVis()
-    },
-    runExecution: function (item) {
-      console.log(item)
     },
     showDialog: function (node) {
       this.dialogItem = node

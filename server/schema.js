@@ -15,7 +15,6 @@ const WebpageType = new GraphQLObjectType({
     identifier: { type: GraphQLID  },
     label: { type: GraphQLString },
     url: { type: GraphQLString },
-    periodicity: { type: GraphQLString },
     regexp: { type: GraphQLString },
     active: { type: GraphQLBoolean },
     tags: { type: GraphQLList(GraphQLString) }
@@ -54,7 +53,6 @@ const RootQuery = new GraphQLObjectType({
               regexp: data[0].regexp,
               active: data[0].active,
               label: data[0].label,
-              periodicity: data[0].periodicity,
               tags: data[0].tags
             }
             res = node
@@ -75,7 +73,6 @@ const RootQuery = new GraphQLObjectType({
                 regexp: x.regexp,
                 active: x.active,
                 label: x.label,
-                periodicity: x.periodicity,
                 tags: x.tags
               }
               return node

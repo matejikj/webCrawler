@@ -22,7 +22,9 @@ exports.create = (req, res) => {
         webpage
           .save()
           .then(data => {
-            addBreeJob(data)
+            if (data.active) {
+              addBreeJob(data)
+            }
             res.send(data);
           })
           .catch(err => {
@@ -93,9 +95,18 @@ exports.update = (req, res) => {
           message: `Cannot update Webpage with id=${id}. Maybe Webpage was not found!`
         });
       } else {
-        removeBreeJob(id)
-        addBreeJob(req.body)
-        res.send({ message: "Webpage was updated successfully." });
+        console.log("STAAAAAAAAART")
+        if (data.active !== req.body.active) {
+          console.log("ROOOOOZNEEE")
+          if (req.body.active) {
+            console.log("addBreeJob")
+            // addBreeJob(req.body)
+          } else {
+            console.log("removeBreeJob")
+            // removeBreeJob(id)
+          }
+        }
+        res.send({ message: data });
       }
     })
     .catch(err => {

@@ -21,7 +21,8 @@ exports.findAll = (req, res) => {
               color: 'green',
               links: node.links,
               isCrawled: true,
-              crawledBy: new Set([webpage.url])
+              crawledBy: new Set([webpage.url]),
+              regexps: [{url: webpage.url, regexp: webpage.regexp}]
             })
           } else {
             const finded = graph.nodes.find(x => x.id === node.url)
@@ -30,6 +31,10 @@ exports.findAll = (req, res) => {
             finded.crawledBy.add(webpage.url)
             finded.links = node.links
             finded.isCrawled = true
+            const findedRegexp = finded.regexps.find(x => x.url === webpage.url)
+            if (findedRegexp === undefined) {
+              finded.regexps.push({url: webpage.url, regexp: webpage.regexp})
+            }
           }
           node.links.forEach(link => {
             if (visitedNodes.indexOf(link) === -1) {
@@ -40,7 +45,8 @@ exports.findAll = (req, res) => {
                 color: 'grey',
                 links: [],
                 isCrawled: false,
-                crawledBy: new Set([webpage.url])
+                crawledBy: new Set([webpage.url]),
+                regexps: [{url: webpage.url, regexp: webpage.regexp}]
               })
             }
             const left = graph.nodes.find(x => x.id === node.url)
