@@ -35,7 +35,7 @@ function generateUUID() { // Public Domain/MIT
 function getPeriodicity(periodicity) {
   switch (periodicity) {
     case 'hour':
-      return "5s"
+      return "3600s"
     case 'minute':
       return "60s"
     case 'day':
@@ -84,7 +84,9 @@ function oneTimeJob(item) {
 function removeBreeJob(url) {
   bree.stop(getScraperName(url))
   try {
-    bree.remove(getScraperName(url))
+    bree.remove(getScraperName(url)).catch(e => {
+      console.log(e)
+    })
   } catch (error) {
     console.log(error)
   }

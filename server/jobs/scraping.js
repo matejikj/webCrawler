@@ -24,10 +24,10 @@ async function main() {
         var t0 = performance.now();
         pagesVisited[nextPage] = true;
         numPagesVisited++;
-        if (numPagesVisited > 20 ) {
-          pagesToVisit = []
-          continue
-        }
+        // if (numPagesVisited > 20 ) {
+        //   pagesToVisit = []
+        //   continue
+        // }
         let res = {}
         try {
           res = await axios(nextPage) 

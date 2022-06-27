@@ -100,10 +100,10 @@ exports.update = (req, res) => {
           console.log("ROOOOOZNEEE")
           if (req.body.active) {
             console.log("addBreeJob")
-            // addBreeJob(req.body)
+            addBreeJob(req.body)
           } else {
             console.log("removeBreeJob")
-            // removeBreeJob(id)
+            removeBreeJob(id)
           }
         }
         res.send({ message: data });
