@@ -22,6 +22,7 @@ exports.create = (req, res) => {
         webpage
           .save()
           .then(data => {
+            console.log("PRIDAVAM")
             if (data.active) {
               addBreeJob(data)
             }

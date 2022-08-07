@@ -6,7 +6,7 @@ module.exports = app => {
     // Retrieve all nodes
     // router.get("/", nodes.findAll);
     // Retrieve a single Tutorial with id
-    router.post("/", nodes.findAll);
+    router.post("/", nodes.findByUrls);
 
     app.use("/nodes", router);
   };
